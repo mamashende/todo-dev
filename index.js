@@ -24,7 +24,7 @@ export default {
         )
       );
       //console.log(data);
-      console.log(data)
+      //console.log(data)
       return new Response(body, {
         headers: { 'Content-Type': 'text/html' }
       });
@@ -32,9 +32,9 @@ export default {
 
     async function updateTodos(request) {
       const body = await request.json();
-      console.log(body)
+      //console.log(body)
       const { id, todo_title, todo_content, status } = body;
-      console.log({ id, todo_title, todo_content, status } )
+      //console.log({ id, todo_title, todo_content, status } )
       if (id === undefined || todo_title === undefined || todo_content === undefined ) {
         return new Response(JSON.stringify({ error: 'Invalid data' }), { status: 400 });
       }
@@ -52,12 +52,12 @@ export default {
     async function addTodo(request) {
       const body = await request.json();
       var { todo_title, todo_content, status } = body;
-      console.log(body);
-      console.log({ todo_title, todo_content });
+      //console.log(body);
+      //console.log({ todo_title, todo_content });
       todo_title = String(todo_title);
       todo_content = String(todo_content);
       status = String(status);
-      console.log(todo_title, todo_content);
+      //console.log(todo_title, todo_content);
       // 查询现有的 todos
       const query0 = 'SELECT * FROM todolist';
       const { results } = await db.prepare(query0).all();
@@ -66,7 +66,7 @@ export default {
       // 检查查询结果是否为空并计算最大 id
       let maxId;
       if (data.todos.length === 0) {
-        console.log('查询结果为空');
+        //console.log('查询结果为空');
         maxId = 1; // 如果没有现有的 todos，设置 maxId 为 1
       } else {
         // 找出查询结果中 id 的最大值
@@ -76,7 +76,7 @@ export default {
         maxId += 1; // 新的 todo 的 id 应该是最大 id 加 1
       }
     
-      console.log('最大 id:', maxId);
+      //console.log('最大 id:', maxId);
     
       // 插入新的 todo
       const query = `

@@ -56,8 +56,8 @@
           } else {
             window.todos = data.todos;
             populateTodos();
-            console.log("dadads")
-            console.log(data)
+            //console.log("dadads")
+            //console.log(data)
           }
         });
         
@@ -150,6 +150,7 @@
             if (data.error) {
               alert(data.error);
             } else {
+              console.log(data)
               window.todos.push(data);
               titleInput.value = '';
               contentInput.value = '';
