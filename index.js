@@ -3,7 +3,7 @@ import template from './template.html';
 
 export default {
   async fetch(request, env) {
-    const db = env.oyzy;
+    const db = env.<your env >;
 
     async function getTodos() {
       const query = 'SELECT * FROM todolist';
