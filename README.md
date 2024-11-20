@@ -14,7 +14,7 @@ https://dash.cloudflare.com/cbc516f6ae8408f59ee579f9686e3747/workers-and-pages/c
 #### 数据库的表名及结构
 关于具体的D1数据库教程请参考：https://developers.cloudflare.com/d1/
 
-数据库表名为todolist
+数据库表名为`todolist`
 
 结构如下：
 | 列名           | 数据类型   | 描述            | 备注           |     |
