@@ -19,10 +19,10 @@ https://dash.cloudflare.com/cbc516f6ae8408f59ee579f9686e3747/workers-and-pages/c
 结构如下：
 | 列名           | 数据类型   | 描述            | 备注           |     |
 | ------------ | ------ | ------------- | ------------ | --- |
-| id           | int    | 待办事项 ID    |   不需要自增       |     |
-| todo_title   | string | 待办事项标题或者分类        |              |     |
-| todo_content | string | 代办事项具体内容      |              |     |
-| todo_status  | int | 此项任务的完成情况     |   完成和未完成用1和0来表示          |     |
+| id           | INTERGER    | 待办事项 ID    |   不需要自增       |     |
+| todo_title   | TEXT | 待办事项标题或者分类        |              |     |
+| todo_content | TEXT | 代办事项具体内容      |              |     |
+| todo_status  | INTERGER | 此项任务的完成情况     |   完成和未完成用1和0来表示          |     |
 
 基于控制台的建表语句如下：
 ```sql
