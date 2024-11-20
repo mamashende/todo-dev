@@ -3,12 +3,10 @@ import template from './template.html';
 
 export default {
   async fetch(request, env) {
-    const db = env.oyzy; // 使用绑定的 D1 数据库
-
-    
+    const db = env.oyzy;
 
     async function getTodos() {
-      const query = 'SELECT * FROM todolist_pre';
+      const query = 'SELECT * FROM todolist';
       const { results } = await db.prepare(query).all();
       const data = { todos: results };
 
@@ -19,12 +17,11 @@ export default {
             id: escapeHtml(todo.id),
             title: escapeHtml(todo.todo_title),
             content: escapeHtml(todo.todo_content),
-            status: !!todo.status
+            status: !!todo.todo_status // 将整数转换为布尔值
           })) ?? []
         )
       );
-      //console.log(data);
-      //console.log(data)
+
       return new Response(body, {
         headers: { 'Content-Type': 'text/html' }
       });
@@ -32,61 +29,42 @@ export default {
 
     async function updateTodos(request) {
       const body = await request.json();
-      //console.log(body)
-      const { id, todo_title, todo_content, status } = body;
-      //console.log({ id, todo_title, todo_content, status } )
-      if (id === undefined || todo_title === undefined || todo_content === undefined ) {
+      const { id, status } = body;
+
+      if (id === undefined || status === undefined) {
         return new Response(JSON.stringify({ error: 'Invalid data' }), { status: 400 });
       }
 
       const query = `
-        UPDATE todolist_pre
-        SET id = ?,todo_title = ?, todo_content = ?, todo_status = ?
+        UPDATE todolist
+        SET todo_status = ?
         WHERE id = ?
       `;
-      await db.prepare(query).bind(todo_title, todo_content, status, id).run();
+      await db.prepare(query).bind(status ? 1 : 0, id).run(); // 将布尔值转换为整数
 
       return new Response(JSON.stringify(body), { status: 200 });
     }
 
     async function addTodo(request) {
       const body = await request.json();
-      var { todo_title, todo_content, status } = body;
-      //console.log(body);
-      //console.log({ todo_title, todo_content });
+      let { todo_title, todo_content, status } = body;
       todo_title = String(todo_title);
       todo_content = String(todo_content);
-      status = String(status);
-      //console.log(todo_title, todo_content);
-      // 查询现有的 todos
-      const query0 = 'SELECT * FROM todolist_pre';
+      status = status ? 1 : 0; // 将布尔值转换为整数
+
+      const query0 = 'SELECT * FROM todolist';
       const { results } = await db.prepare(query0).all();
       const data = { todos: results };
-    
-      // 检查查询结果是否为空并计算最大 id
-      let maxId;
-      if (data.todos.length === 0) {
-        //console.log('查询结果为空');
-        maxId = 1; // 如果没有现有的 todos，设置 maxId 为 1
-      } else {
-        // 找出查询结果中 id 的最大值
-        maxId = data.todos.reduce((max, todo) => {
-          return todo.id > max ? todo.id : max;
-        }, -Infinity);
-        maxId += 1; // 新的 todo 的 id 应该是最大 id 加 1
-      }
-    
-      //console.log('最大 id:', maxId);
-    
-      // 插入新的 todo
+
+      let maxId = data.todos.length === 0 ? 1 : Math.max(...data.todos.map(todo => todo.id)) + 1;
+
       const query = `
-        INSERT INTO todolist_pre (id,todo_title, todo_content, todo_status)
+        INSERT INTO todolist (id, todo_title, todo_content, todo_status)
         VALUES (?, ?, ?, ?)
       `;
-      await db.prepare(query).bind(maxId,todo_title, todo_content, status).run();
-    
-      // 返回插入后的数据
-      const newTodo = { id: maxId, todo_title: todo_title, todo_content: todo_content, todo_status: status };
+      await db.prepare(query).bind(maxId, todo_title, todo_content, status).run();
+
+      const newTodo = { id: maxId, title: todo_title, content: todo_content, status: !!status };
       return new Response(JSON.stringify(newTodo), { status: 200 });
     }
 
@@ -94,10 +72,8 @@ export default {
       const body = await request.json();
       const { id } = body;
 
-      
-
       const query = `
-        DELETE FROM todolist_pre
+        DELETE FROM todolist
         WHERE id = ?
       `;
       await db.prepare(query).bind(id).run();
