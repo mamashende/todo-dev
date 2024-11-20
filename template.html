@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Todos</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="bg-blue-200">
+    <div class="w-full h-full flex content-center justify-center mt-8">
+      <div class="bg-white shadow-md rounded px-8 pt-6 py-8 mb-4">
+        <h1 class="block text-grey-800 text-md font-bold mb-2">Todos</h1>
+        <div class="flex">
+          <input
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-grey-800 leading-tight focus:outline-none focus:shadow-outline"
+            type="text"
+            name="title"
+            placeholder="Todo title"
+          />
+          <input
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-grey-800 leading-tight focus:outline-none focus:shadow-outline ml-2"
+            type="text"
+            name="content"
+            placeholder="Todo content"
+          />
+          <button
+            class="bg-blue-500 hover:bg-blue-800 text-white font-bold ml-2 py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            id="create"
+            type="submit"
+          >
+            Create
+          </button>
+        </div>
+        <div class="mt-4" id="todos"></div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    window.todos = $TODOS;
+    var updateTodos = function () {
+      fetch('/', {
+        method: 'PUT',
+        body: JSON.stringify(window.todos),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            window.todos = data.todos;
+            populateTodos();
+            console.log("dadads")
+            console.log(data)
+          }
+        });
+        
+    };
+
+    var completeTodo = function (evt) {
+      var checkbox = evt.target;
+      var todoElement = checkbox.parentNode;
+      var todo = window.todos.find(t => t.id == todoElement.dataset.todo);
+      todo.status = todo.status === 1 ? 0 : 1;
+      updateTodos();
+    };
+
+    var deleteTodo = function (evt) {
+      var todoElement = evt.target.parentNode;
+      var todoId = todoElement.dataset.todo;
+      fetch('/', {
+        method: 'DELETE',
+        body: JSON.stringify({ id: todoId }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            window.todos = window.todos.filter(t => t.id != data.id);
+            populateTodos();
+          }
+        });
+    };
+
+    var populateTodos = function () {
+      var todoContainer = document.querySelector('#todos');
+      todoContainer.innerHTML = null;
+
+      window.todos.forEach(todo => {
+        var el = document.createElement('div');
+        el.className = 'border-t py-4';
+        el.dataset.todo = todo.id;
+
+        var title = document.createElement('span');
+        title.className = todo.status ? 'line-through' : '';
+        title.textContent = todo.title;
+
+        var content = document.createElement('span');
+        content.className = 'ml-2';
+        content.textContent = todo.content;
+
+        var checkbox = document.createElement('input');
+        checkbox.className = 'mx-4';
+        checkbox.type = 'checkbox';
+        checkbox.checked = todo.status ? 1 : 0;
+        checkbox.addEventListener('click', completeTodo);
+
+        var deleteButton = document.createElement('button');
+        deleteButton.className = 'bg-red-500 hover:bg-red-800 text-white font-bold ml-2 py-1 px-2 rounded focus:outline-none focus:shadow-outline';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', deleteTodo);
+
+        el.appendChild(checkbox);
+        el.appendChild(title);
+        el.appendChild(content);
+        el.appendChild(deleteButton);
+        todoContainer.appendChild(el);
+      });
+    };
+
+    populateTodos();
+
+    var createTodo = function () {
+      var titleInput = document.querySelector('input[name=title]');
+      var contentInput = document.querySelector('input[name=content]');
+      if (titleInput.value.length && contentInput.value.length) {
+        var newTodo = {
+          
+          todo_title: titleInput.value,
+          todo_content: contentInput.value,
+          status: 1
+        };
+        fetch('/', {
+          method: 'POST',
+          body: JSON.stringify(newTodo),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(response => response.json())
+          .then(data => {
+            if (data.error) {
+              alert(data.error);
+            } else {
+              window.todos.push(data);
+              titleInput.value = '';
+              contentInput.value = '';
+              populateTodos();
+            }
+          });
+      }
+    };
+
+    document.querySelector('#create').addEventListener('click', createTodo);
+  </script>
+</html>
