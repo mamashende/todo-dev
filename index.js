@@ -8,7 +8,7 @@ export default {
     
 
     async function getTodos() {
-      const query = 'SELECT * FROM todolist';
+      const query = 'SELECT * FROM todolist_pre';
       const { results } = await db.prepare(query).all();
       const data = { todos: results };
 
@@ -40,7 +40,7 @@ export default {
       }
 
       const query = `
-        UPDATE todolist
+        UPDATE todolist_pre
         SET id = ?,todo_title = ?, todo_content = ?, todo_status = ?
         WHERE id = ?
       `;
@@ -59,7 +59,7 @@ export default {
       status = String(status);
       //console.log(todo_title, todo_content);
       // 查询现有的 todos
-      const query0 = 'SELECT * FROM todolist';
+      const query0 = 'SELECT * FROM todolist_pre';
       const { results } = await db.prepare(query0).all();
       const data = { todos: results };
     
@@ -80,7 +80,7 @@ export default {
     
       // 插入新的 todo
       const query = `
-        INSERT INTO todolist (id,todo_title, todo_content, todo_status)
+        INSERT INTO todolist_pre (id,todo_title, todo_content, todo_status)
         VALUES (?, ?, ?, ?)
       `;
       await db.prepare(query).bind(maxId,todo_title, todo_content, status).run();
@@ -97,7 +97,7 @@ export default {
       
 
       const query = `
-        DELETE FROM todolist
+        DELETE FROM todolist_pre
         WHERE id = ?
       `;
       await db.prepare(query).bind(id).run();
