@@ -2,7 +2,7 @@
 Cloudflare workers的新手教程里有一个最简化版的todolist应用，它的数据存储只基于Cloudflare KV，实现了对于每一个用户（或者是设备）单独存储一份todolist数据
 https://dash.cloudflare.com/cbc516f6ae8408f59ee579f9686e3747/workers-and-pages/create/integration/2f4ab7e9-ff61-4cde-90b3-9572912afd5c/version/0.2.0/integrations-setup
 
-我在这个应用的基础上，做了许多改动，将数据存储改为Cloudflare D1 SQL，并重构了它的后端使其实现了对于任何访问用户，存储共享的一份todolist数据，如果只有单个用户的话，这个应用就是最简单的实现todolist数据多端同步访问的方法。实际上我的设计目的也正是此。
+我在这个应用的基础上，做了许多改动，将数据存储改为Cloudflare D1 SQL，并重构了它的后端。使其实现了对于任何访问用户，存储共享的一份todolist数据，如果只有单个用户的话，这个应用就是最简单的实现todolist数据多端同步访问的方法。实际上我的设计目的也正是此。
 
 ## 如何部署在自己的Cloudflare workers上
 具体细节可以参考CF家的官方workers教程，如下：https://developers.cloudflare.com/workers/
