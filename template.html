@@ -124,7 +124,30 @@
           populateTodos();
         }
       }
-    
+
+         async function updateTodoStatus(id, status) {
+    // 乐观更新
+    const index = todos.findIndex(todo => todo.id === id);
+    if (index !== -1) {
+      todos[index].status = status;
+      populateTodos();
+    }
+
+    const response = await fetch('/todos', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id, status })
+    });
+
+    if (!response.ok) {
+      // 回滚乐观更新
+      todos[index].status = !status;
+      populateTodos();
+    }
+  }
+      
       document.getElementById('create').addEventListener('click', createTodo);
       todoList.addEventListener('click', (event) => {
         if (event.target.tagName === 'BUTTON') {
