@@ -43,7 +43,7 @@
     <script>
       const todos = JSON.parse('$TODOS');
       const todoList = document.getElementById('todo-list');
-
+    
       function populateTodos() {
         todoList.innerHTML = '';
         todos.forEach(todo => {
@@ -57,18 +57,28 @@
           todoList.appendChild(li);
         });
       }
-
+    
       populateTodos();
-
+    
       async function createTodo() {
         const titleInput = document.getElementById('title');
         const contentInput = document.getElementById('content');
         const newTodo = {
+          id: Date.now(), // 临时ID
           todo_title: titleInput.value,
           todo_content: contentInput.value,
           status: false
         };
-
+        const temp_data = {
+          id: Date.now(), // 临时ID
+          title: titleInput.value,
+          content: contentInput.value,
+          status: false
+        };
+        // 乐观更新
+        todos.push(temp_data);
+        populateTodos();
+    
         const response = await fetch('/todos', {
           method: 'POST',
           headers: {
@@ -76,17 +86,30 @@
           },
           body: JSON.stringify(newTodo)
         });
-
+    
         if (response.ok) {
           const data = await response.json();
-          todos.push(data);
-          titleInput.value = '';
-          contentInput.value = '';
+          // 更新临时ID为后端返回的真实ID
+          const index = todos.findIndex(todo => todo.id === newTodo.id);
+          if (index !== -1) {
+            todos[index].id = data.id;
+          }
+        } else {
+          // 回滚乐观更新
+          todos.pop();
           populateTodos();
         }
+    
+        titleInput.value = '';
+        contentInput.value = '';
       }
-
+    
       async function deleteTodo(id) {
+        // 乐观更新
+        const index = todos.findIndex(todo => todo.id === id);
+        const [deletedTodo] = todos.splice(index, 1);
+        populateTodos();
+    
         const response = await fetch('/todos', {
           method: 'DELETE',
           headers: {
@@ -94,33 +117,14 @@
           },
           body: JSON.stringify({ id })
         });
-
-        if (response.ok) {
-          const index = todos.findIndex(todo => todo.id === id);
-          if (index !== -1) {
-            todos.splice(index, 1);
-            populateTodos();
-          }
+    
+        if (!response.ok) {
+          // 回滚乐观更新
+          todos.splice(index, 0, deletedTodo);
+          populateTodos();
         }
       }
-
-      async function updateTodoStatus(id, status) {
-        const response = await fetch('/todos', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ id, status })
-        });
-
-        if (response.ok) {
-          const index = todos.findIndex(todo => todo.id === id);
-          if (index !== -1) {
-            todos[index].status = status;
-          }
-        }
-      }
-
+    
       document.getElementById('create').addEventListener('click', createTodo);
       todoList.addEventListener('click', (event) => {
         if (event.target.tagName === 'BUTTON') {
